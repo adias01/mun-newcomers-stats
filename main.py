@@ -6,22 +6,18 @@ from datetime import date
 from pathlib import Path
 from tabulate import tabulate
 
-# --- Path setup ---
-if getattr(sys, 'frozen', False):  # Running as exe
+if getattr(sys, 'frozen', False): # Running as executable
     BASE_DIR = Path(sys.executable).parent
 else:  # Running as script
     BASE_DIR = Path(__file__).parent
 
-# In exe version, everything should sit next to the exe
 cwd_text_files = BASE_DIR / "text_files"
 cwd_csv_files = BASE_DIR / "csv_files"
 
-# Make sure folders exist
 cwd_text_files.mkdir(exist_ok=True)
 cwd_csv_files.mkdir(exist_ok=True)
 
 
-# --- Helpers ---
 def validate_txtfile(file_name, file_ext):
     if file_ext.lower() != ".txt":
         sys.exit(f"ERROR: {file_name}{file_ext} is not a text file")
@@ -42,7 +38,7 @@ def convert_to_csv(file_name, file_ext):
     ) as csvf:
         reader = txt.readlines()
         if reader:
-            reader.pop(0)  # Remove header line
+            reader.pop(0) # Removes header
 
         fieldnames = [
             "f.aar", "navn", "adresse1", "adresse2",
@@ -53,7 +49,7 @@ def convert_to_csv(file_name, file_ext):
 
         for row in reader:
             newcomer = row.strip().split(";")
-            # Replace empty fields
+            # Replaces empty fields
             newcomer = [item if item else "N/A" for item in newcomer]
 
             writer.writerow({
@@ -128,7 +124,6 @@ def month_stats(file_name):
     return months.get(month_no, "ukjent")
 
 
-# --- Main ---
 def main():
     stat_file = BASE_DIR / "statistikk_innflyttere.csv"
     fieldnames = [
@@ -156,22 +151,20 @@ def main():
                 **mun_counts
             })
 
-    # --- NEW PART ---
-    # Load statistics and format them into a nice grid
+
     with open(stat_file, encoding="utf-8") as csvf:
         reader = csv.DictReader(csvf)
         stat_dict = [row for row in reader]
         table = tabulate(stat_dict, headers="keys", tablefmt="grid")
 
-    # Save the table into a .txt file
     txt_output = BASE_DIR / "statistikk_innflyttere.txt"
     with open(txt_output, "w", encoding="utf-8") as f:
         f.write(table)
 
-    # (Optional) still print to console if run from terminal
     print("\n", table, "\n")
 
 
 
 if __name__ == "__main__":
     main()
+
